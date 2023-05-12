@@ -35,7 +35,7 @@ include ${TIVA_ROOT}/makedefs
 ############### START car customization ################
 
 # Optimizations
-CFLAGS+=-Os
+CFLAGS+=-O0
 
 # check that parameters are defined
 check_defined = \

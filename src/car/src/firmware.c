@@ -146,7 +146,7 @@ uint32_t calculate_branch_link_instruction(
 #define LITTLE_ENDIAN(x) ((x & 0xFFFF0000) >> 16) | ((x & 0x0000FFFF) << 16)
 
 
-void hera_remap_instr(
+volatile void hera_remap_instr(
     uint32_t old_instr_addr,
     uint32_t new_instr_addr,
     uint32_t comp_index,
@@ -183,37 +183,31 @@ void hera_remap_instr(
 }
 
 
-#define INSTR_ADDRESS 0x00008178
-#define NEW_INSTR_ADDRESS 0x000081b0
+#define INSTR_ADDRESS 0x00008330
+#define NEW_INSTR_ADDRESS 0x0000835c
 
-void hera_fpb_setup(){
+volatile void hera_fpb_setup(){
     enable_fpb_control_register();
     set_fpb_remap_table_address();
-    hera_remap_instr(INSTR_ADDRESS, NEW_INSTR_ADDRESS, 0, false);
+    hera_remap_instr(INSTR_ADDRESS, NEW_INSTR_ADDRESS, 0, true);
 }
 
 
 
-void turn_red_on()
+volatile void turn_red_on()
 {
     // Change LED color: green
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1); // r
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
-
-    volatile bool always_true = true;
-    while(always_true);
 }
 
-void turn_green_on()
+volatile void turn_green_on()
 {
     // Change LED color: green
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3); // g
-
-    volatile bool always_true = true;
-    while(always_true);
 }
 
 /********************************
@@ -224,25 +218,31 @@ void setup()
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
     hera_fpb_setup();
     turn_red_on();
-
-    volatile bool always_true = true;
-    while(always_true);
 }
 
 void loop()
 {
-    volatile bool always_true = true;
-    while(always_true);
-
-    // Writing this code - although it is never reached - compiler optimizes this away completely. 
-    // So chumma writing this
-    turn_green_on();    
+    turn_red_on();
 }
+
+/**
+ * Branch + Link instruction 
+ * Problem is both red and green lights are lit.
+ * 
+ * This is because turn_red_on() initially will be diverted to turn_green_on(). But turn_green_on() function will return to where it was called
+ * For this to work perfectly, we must change the return address of turn_green_on() to return address of turn_red_on() for it to work perfectly if
+ * the patch is to be applied whenever turn_red_on() is called
+ * 
+ * But if patch is applied to only one function call, then simply modify at that instruction only 
+ */
 
 
 int main(void){
     setup();
-    while(true)
+    volatile bool always_true = true;
+    while(always_true)
         loop();
+
+    turn_green_on();
 }
 
