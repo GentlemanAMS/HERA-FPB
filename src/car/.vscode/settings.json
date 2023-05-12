@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.llc_repl": "cpp",
+        "systick.h": "c",
+        "pin_map.h": "c"
+    }
+}
