@@ -205,12 +205,12 @@ void turn_red_on()
     while(always_true);
 }
 
-void turn_green_on()
+void turn_blue_on()
 {
     // Change LED color: green
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3); // g
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2); // b
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
 
     volatile bool always_true = true;
     while(always_true);
@@ -236,7 +236,7 @@ void loop()
 
     // Writing this code - although it is never reached - compiler optimizes this away completely. 
     // So chumma writing this
-    turn_green_on();    
+    turn_blue_on();    
 }
 
 
