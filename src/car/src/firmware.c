@@ -87,32 +87,21 @@ uint32_t calculate_branch_instruction(
     uint32_t target_instr_addr)
 {
 
-    uint32_t offset = target_instr_addr - curr_instr_addr;
+    uint32_t offset = target_instr_addr - curr_instr_addr - 4;
     
     uint32_t offset_msb10 = (offset >> 12) & 0x3FF;
-    uint32_t offset_lsb11 = ((offset - 4) >> 1) & 0x07FF;
+    uint32_t offset_lsb11 = (offset >> 1) & 0x07FF;
 
-    // If offset is greater than 21, these values are non zero
-    uint8_t s = (offset - 4) & (1 << 24);
-    uint8_t i1 = (offset - 4) & (1 << 23);
-    uint8_t i2 = (offset - 4) & (1 << 22);
+    uint32_t s = (offset & (1 << 24)) >> 24;
+    uint32_t i1 = (offset & (1 << 23)) >> 23;
+    uint32_t i2 = (offset & (1 << 22)) >> 22;
 
-    // If offset is greater than 21, these flags are 1 - else zero
-    uint8_t j1 = 0x01 & ((~i1) ^ s);
-    uint8_t j2 = 0x01 & ((~i2) ^ s);
+    uint32_t j1 = 0x01 & ((~i1) ^ s);
+    uint32_t j2 = 0x01 & ((~i2) ^ s);
 
 
-    //LSB 10 bits indicate the MSB 10 bits
-    //11th bit indicate whether offset is greater than 24
-    //12th-16th indicate opcode
-    uint16_t b_instr_msb16 = ( (0x1E << 11) | (s << 10) | offset_msb10); 
-
-    //LSB 11 bits indicate the LSB 11 bits
-    //12th bit indicate whether offset is greater than 23
-    //13th bit is always 1
-    //14th bit indicate whether offset is greater than 22
-    //15th and 16th bit part of opcode 
-    uint16_t b_instr_lsb16 = ((0x02 << 14) | (j1 << 13) | (0x01 << 12) | (j2 << 11) | offset_lsb11);
+    uint32_t b_instr_msb16 = ((0x1E << 11) | (s << 10) | offset_msb10) & 0xFFFF; 
+    uint32_t b_instr_lsb16 = ((0x02 << 14) | (j1 << 13) | (0x01 << 12) | (j2 << 11) | offset_lsb11) & 0xFFFF;
 
     uint32_t b_instr = ((uint32_t)b_instr_msb16 << 16) | b_instr_lsb16;
 
@@ -183,8 +172,8 @@ void hera_remap_instr(
 }
 
 
-#define INSTR_ADDRESS 0x00008178
-#define NEW_INSTR_ADDRESS 0x000081b0
+#define INSTR_ADDRESS 0x000081a0
+#define NEW_INSTR_ADDRESS 0x000081db
 
 void hera_fpb_setup(){
     enable_fpb_control_register();
@@ -245,4 +234,3 @@ int main(void){
     while(true)
         loop();
 }
-
