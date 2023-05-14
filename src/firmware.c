@@ -24,11 +24,10 @@
 #define FPB_COMP6           0xE0002020UL
 #define FPB_COMP7           0xE0002024UL
 
-#define REMAP_TABLE_ADDR (0x20007000UL)
-
 #define HWREG(x) (*((volatile uint32_t *)(x)))
 
 
+uint32_t remap_table[8];
 
 /**
  * @brief 
@@ -44,7 +43,7 @@ void enable_fpb_control_register(){
  * Documentation: https://developer.arm.com/documentation/ddi0403/d/Debug-Architecture/ARMv7-M-Debug/Flash-Patch-and-Breakpoint-unit/FlashPatch-Remap-register--FP-REMAP?lang=en
  */
 void set_fpb_remap_table_address(){
-    HWREG(FPB_REMAP_REGISTER) = REMAP_TABLE_ADDR;
+    HWREG(FPB_REMAP_REGISTER) = remap_table;
 }
 
 /**
@@ -157,7 +156,7 @@ void hera_remap_instr(
     // If aligned no issues
     if(old_instr_addr % 4 == 0){
         write_fpb_comp_register(comp_index, old_instr_addr);
-        *((uint32_t *)(REMAP_TABLE_ADDR + 4*comp_index)) = LITTLE_ENDIAN(remap_instr);
+        remap_table[comp_index] = LITTLE_ENDIAN(remap_instr);
     }
 
     // Half-aligned : pain in the arse
@@ -170,25 +169,39 @@ void hera_remap_instr(
         write_fpb_comp_register(comp_index, old_instr_addr & 0xFFFFFFFC);
         write_fpb_comp_register(comp_index+1, (old_instr_addr & 0xFFFFFFFC) + 4);
 
-        *((uint32_t *)(REMAP_TABLE_ADDR + 4*comp_index)) = (((LITTLE_ENDIAN(remap_instr) & 0x0000FFFF) << 16) | (old_instr[0] & 0x0000FFFF));
-        *((uint32_t *)(REMAP_TABLE_ADDR + 4*(comp_index+1))) = ((old_instr[1] & 0xFFFF0000) | ((LITTLE_ENDIAN(remap_instr) & 0xFFFF0000) >> 16));
+        remap_table[comp_index] = (((LITTLE_ENDIAN(remap_instr) & 0x0000FFFF) << 16) | (old_instr[0] & 0x0000FFFF));
+        remap_table[comp_index + 1] = ((old_instr[1] & 0xFFFF0000) | ((LITTLE_ENDIAN(remap_instr) & 0xFFFF0000) >> 16));
     }
     return;
 }
 
 
-#define INSTR_ADDRESS 0x000082f0
-#define NEW_INSTR_ADDRESS 0x000082a0
+#define INSTR_ADDRESS 0x000082ec
+#define NEW_INSTR_ADDRESS 0x0000828c
 
 volatile uint32_t old_instruction_address = INSTR_ADDRESS;
 volatile uint32_t new_instruction_address = NEW_INSTR_ADDRESS;
 volatile uint32_t link = true;
 
 
+void print_reg(){
+    uart_write(UART0_BASE, "AAA", 4);
+    uart_write(UART0_BASE, FPB_CTRL_REGISTER, 4);
+    uart_write(UART0_BASE, FPB_REMAP_REGISTER, 4);
+    uart_write(UART0_BASE, remap_table, 4);
+    uint32_t** remap_table_address;
+    *remap_table_address = remap_table;
+    uart_write(UART0_BASE, remap_table_address, 4);
+    uart_write(UART0_BASE, FPB_COMP0, 4);
+    uart_write(UART0_BASE, "\n", 4);
+}
+
 void hera_fpb_setup(){
+    print_reg();
     enable_fpb_control_register();
     set_fpb_remap_table_address();
     hera_remap_instr(old_instruction_address, new_instruction_address, 0, link);
+    print_reg();
 }
 
 
@@ -210,13 +223,13 @@ void turn_blue_on()
 void turn_green_on()
 {
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2); // b
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3); // g
 }
 
-/************
+/********************************
  * Functionality 
- ***********/
+ *******************************/
 void setup()
 {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
@@ -234,15 +247,15 @@ void loop()
     while(always_true){    
         
         turn_blue_on();
-        for (delay = 0; delay < DELAY; delay++);
+        for (delay = 0; delay < DELAY*3; delay++);
         
         turn_red_on();
-        for (delay = 0; delay < DELAY; delay++);
+        for (delay = 0; delay < DELAY/10; delay++);
         
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
-        for (delay = 0; delay < DELAY; delay++);
+        for (delay = 0; delay < DELAY/10; delay++);
     }
 }
 

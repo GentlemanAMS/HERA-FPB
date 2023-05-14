@@ -10,14 +10,8 @@
  * @brief 
  * Sets up UART communication with PC
  */
-void uart_hosttools_init(void);
+void uart_init(void);
 
-
-/**
- * @brief 
- * Sets up UART communication with other board
- */
-void uart_board_init(void);
 
 /**
  * @brief 

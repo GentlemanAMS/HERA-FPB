@@ -1,0 +1,24 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+        "name": "Cortex Debug",
+        "cwd": "${workspaceFolder}",
+        "executable": "../../fpb_demo/hera_fpb.elf",
+        "request": "launch",
+        "type": "cortex-debug",
+        "runToEntryPoint": "main",
+        "servertype": "openocd",
+        "device": "TM4C123GH6PM",
+        "configFiles": [
+        "/usr/share/openocd/scripts/interface/ti-icdi.cfg",
+        "/usr/share/openocd/scripts/board/ti_ek-tm4c123gxl.cfg"
+        ],
+        "svdFile": "~/academics/sse_proj/HERA-FPB/TM4C123GH6PM.svd",
+        "showDevDebugOutput": "raw"
+        }
+    ]
+}

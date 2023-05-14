@@ -25,7 +25,7 @@
  * @brief 
  * Sets up UART communication with PC
  */
-void uart_hosttools_init(void){
+void uart_init(void){
 
     //Enable UART0 Peripheral
     SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
@@ -52,40 +52,6 @@ void uart_hosttools_init(void){
     UARTEnable(UART0_BASE);
 }
 
-
-/**
- * @brief 
- * Sets up UART communication with other board
- */
-void uart_board_init(void){
-
-    //Enable UART1 Peripheral
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART1);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_UART1));
-
-    //Enable GPIOB Peripheral
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
-
-    //Configure GPIO pins for RX and TX
-    GPIOPinConfigure(GPIO_PB0_U1RX);
-    GPIOPinConfigure(GPIO_PB1_U1TX);
-
-    //Configure GPIO and set them up to UART1
-    GPIOPinTypeUART(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-
-    //UART Clock source is system clock
-    UARTClockSourceSet(UART1_BASE, UART_CLOCK_SYSTEM);
-
-    //Set UART Baud rate
-    UARTConfigSetExpClk(UART1_BASE, SysCtlClockGet(), BAUD_RATE_TOBOARD, UART_CONFIG_WLEN_8 | UART_CONFIG_PAR_NONE | UART_CONFIG_STOP_TWO);
-    
-    GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_0, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU); 
-    GPIOPadConfigSet(GPIO_PORTB_BASE, GPIO_PIN_1, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
-
-    //Enable UART
-    UARTEnable(UART1_BASE);
-}
 
 
 /**

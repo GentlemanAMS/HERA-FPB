@@ -38,8 +38,18 @@
 //*****************************************************************************
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "inc/hw_nvic.h"
 #include "inc/hw_types.h"
+
+#include "inc/hw_ints.h"
+#include "inc/hw_gpio.h"
+#include "inc/hw_memmap.h"
+
+#include "driverlib/gpio.h"
+#include "driverlib/pin_map.h"
+#include "driverlib/sysctl.h"
+
 
 //*****************************************************************************
 //
@@ -157,7 +167,11 @@ FaultISR(void)
 {
     //
     // Enter an infinite loop.
-    //
+    //  
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1); // r
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2); // b
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3); // g
+
     while(1)
     {
     }

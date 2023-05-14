@@ -3,5 +3,8 @@
         "*.llc_repl": "cpp",
         "systick.h": "c",
         "pin_map.h": "c"
-    }
+    },
+    "cortex-debug.armToolchainPath": "/usr/bin/arm-none-eabi-gcc",
+    "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",
+    "cortex-debug.objdumpPath": "/usr/bin/arm-none-eabi-objdump",
 }
