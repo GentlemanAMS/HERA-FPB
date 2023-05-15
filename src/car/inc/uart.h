@@ -42,7 +42,7 @@ bool uart_read_avail(uint32_t uart_port);
  * @param timeout : time before which all bytes must be received
  * @return int32_t : -1 if expected bytes are not received - 0 when received
  */
-int32_t uart_read(uint32_t uart_port, uint8_t* buffer, uint32_t buffer_length, uint32_t timeout);
+void uart_read(uint32_t uart_port, uint8_t* buffer, uint32_t buffer_length);
 
 
 #endif // UART_H

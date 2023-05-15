@@ -84,26 +84,22 @@ bool uart_read_avail(uint32_t uart_port)
 
 /**
  * @brief 
- * Try to read 'buffer_length' characters into 'buffer' from UART port 'uart_port' within 'timeout' milliseconds
+ * Try to read 'buffer_length' characters into 'buffer' from UART port 'uart_port'
  * If expected message length is read then return 0, else return -1
  * @param uart_port : UART1_BASE or UART0_BASE
  * @param buffer : received bytes is filled into this buffer
  * @param buffer_length : number of bytes expected to be received
- * @param timeout : time before which all bytes must be received
  * @return int32_t : -1 if expected bytes are not received - 0 when received
  */
-int32_t uart_read(uint32_t uart_port, uint8_t* buffer, uint32_t buffer_length, uint32_t timeout)
+void uart_read(uint32_t uart_port, uint8_t* buffer, uint32_t buffer_length)
 {
     uint32_t bytes_read = 0;
-    uint32_t start_read_time = millis();
 
-    while((millis() < start_read_time + timeout) && bytes_read < buffer_length){
+    while(bytes_read < buffer_length){
         if (!UARTCharsAvail(uart_port)) continue;
         buffer[bytes_read] = (uint8_t)UARTCharGet(uart_port);
         bytes_read++;
     }
-    if (bytes_read == buffer_length) return 0;
-    else return -1;
 }
 
 

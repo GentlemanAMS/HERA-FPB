@@ -177,18 +177,16 @@ void hera_remap_instr(
 }
 
 
-#define INSTR_ADDRESS 0x000082f0
-#define NEW_INSTR_ADDRESS 0x000082a0
-
-volatile uint32_t old_instruction_address = INSTR_ADDRESS;
-volatile uint32_t new_instruction_address = NEW_INSTR_ADDRESS;
-volatile uint32_t link = true;
+volatile uint32_t old_instruction_address;
+volatile uint32_t new_instruction_address;
+volatile uint8_t counter = 0;
+volatile uint8_t link;
 
 
 void hera_fpb_setup(){
     enable_fpb_control_register();
     set_fpb_remap_table_address();
-    hera_remap_instr(old_instruction_address, new_instruction_address, 0, link);
+    hera_remap_instr(old_instruction_address, new_instruction_address, counter, link);
 }
 
 
@@ -214,6 +212,13 @@ void turn_green_on()
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3); // g
 }
 
+void turn_all_off()
+{
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g    
+}
+
 /************
  * Functionality 
  ***********/
@@ -221,7 +226,6 @@ void setup()
 {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
     uart_init();
-    hera_fpb_setup();
 }
 
 volatile int delay;
@@ -233,15 +237,42 @@ void loop()
 
     while(always_true){    
         
+        if(uart_read_avail(UART0_BASE)){
+
+            uint8_t data[4];
+
+            while(true){
+                uart_read(UART0_BASE, data, 1);
+                if (*data == 0x55)
+                    break;
+            }
+
+            uart_read(UART0_BASE, data, 4);
+            old_instruction_address = data[0];
+            old_instruction_address = (old_instruction_address << 8) | data[1];
+            old_instruction_address = (old_instruction_address << 8) | data[2];
+            old_instruction_address = (old_instruction_address << 8) | data[3];
+
+            uart_read(UART0_BASE, data, 4);
+            new_instruction_address = data[0];
+            new_instruction_address = (new_instruction_address << 8) | data[1];
+            new_instruction_address = (new_instruction_address << 8) | data[2];
+            new_instruction_address = (new_instruction_address << 8) | data[3];
+
+            uart_read(UART0_BASE, data, 1);
+            link = data[0];
+
+            hera_fpb_setup();
+            counter++;
+        }
+
         turn_blue_on();
         for (delay = 0; delay < DELAY; delay++);
         
         turn_red_on();
         for (delay = 0; delay < DELAY; delay++);
         
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
+        turn_all_off();
         for (delay = 0; delay < DELAY; delay++);
     }
 }
@@ -253,4 +284,5 @@ int main(void){
     turn_blue_on();
     turn_red_on();
     turn_green_on();
+    turn_all_off();
 }
