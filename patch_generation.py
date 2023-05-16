@@ -1,9 +1,9 @@
-gpio_pin_write_addr = 0x00008900                     #GPIOPinWrite()
+gpio_pin_write_addr = 0x00008a04                     #GPIOPinWrite()
 instr_addr          = 0x00024000                        #Instruction where it starts
 
-call_function_1_addr = 0x83c8
-call_function_2_addr = 0x83d8
-call_function_3_addr = 0x83e8
+call_function_1_addr = 0x84cc
+call_function_2_addr = 0x84dc
+call_function_3_addr = 0x84ec
 
 
 

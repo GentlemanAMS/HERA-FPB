@@ -29,6 +29,14 @@
 
 #define HWREG(x) (*((volatile uint32_t *)(x)))
 
+#define FLASH_REMAP_TABLE 0x3fc00
+#define FLASH_COMP_TABLE 0x3fd00
+#define FLASH_NO_OF_COUNTERS 0x3fb00
+
+volatile uint32_t old_instruction_address;
+volatile uint32_t new_instruction_address;
+volatile uint32_t counter = 0;
+volatile uint8_t link;
 
 
 /**
@@ -59,14 +67,19 @@ void write_fpb_comp_register(
     uint8_t comparator_index,
     uint32_t old_instr_addr
 ){
-    if(comparator_index == 0)      HWREG(FPB_COMP0) = old_instr_addr | 0x01;
-    else if(comparator_index == 1) HWREG(FPB_COMP1) = old_instr_addr | 0x01;
-    else if(comparator_index == 2) HWREG(FPB_COMP2) = old_instr_addr | 0x01;
-    else if(comparator_index == 3) HWREG(FPB_COMP3) = old_instr_addr | 0x01;
-    else if(comparator_index == 4) HWREG(FPB_COMP4) = old_instr_addr | 0x01;
-    else if(comparator_index == 5) HWREG(FPB_COMP5) = old_instr_addr | 0x01;
-    else if(comparator_index == 6) HWREG(FPB_COMP6) = old_instr_addr | 0x01;
-    else if(comparator_index == 7) HWREG(FPB_COMP7) = old_instr_addr | 0x01;
+
+    uint32_t comparator_value = old_instr_addr | 0x01; 
+
+    if(comparator_index == 0)      HWREG(FPB_COMP0) = comparator_value;
+    else if(comparator_index == 1) HWREG(FPB_COMP1) = comparator_value;
+    else if(comparator_index == 2) HWREG(FPB_COMP2) = comparator_value;
+    else if(comparator_index == 3) HWREG(FPB_COMP3) = comparator_value;
+    else if(comparator_index == 4) HWREG(FPB_COMP4) = comparator_value;
+    else if(comparator_index == 5) HWREG(FPB_COMP5) = comparator_value;
+
+    //Updating FPB_COMPs in SRAM and FLASH
+    FlashProgram(&comparator_value, FLASH_COMP_TABLE+4*comparator_index, 4);
+
 }
 
 
@@ -155,10 +168,21 @@ void hera_remap_instr(
         remap_instr = calculate_branch_instruction(old_instr_addr, new_instr_addr);
     }
 
+    remap_instr = LITTLE_ENDIAN(remap_instr);
+
     // If aligned no issues
     if(old_instr_addr % 4 == 0){
+        
         write_fpb_comp_register(comp_index, old_instr_addr);
-        *((uint32_t *)(REMAP_TABLE_ADDR + 4*comp_index)) = LITTLE_ENDIAN(remap_instr);
+        
+        //Updating remap table in SRAM and FLASH
+        *((uint32_t *)(REMAP_TABLE_ADDR + 4*comp_index)) = remap_instr;
+        FlashProgram(&remap_instr, FLASH_REMAP_TABLE+4*comp_index, 4);
+
+        //Update counter list in SRAM and FLASH
+        counter++;
+        FlashProgram(&counter, FLASH_NO_OF_COUNTERS, 4);
+
     }
 
     // Half-aligned : pain in the arse
@@ -171,17 +195,23 @@ void hera_remap_instr(
         write_fpb_comp_register(comp_index, old_instr_addr & 0xFFFFFFFC);
         write_fpb_comp_register(comp_index+1, (old_instr_addr & 0xFFFFFFFC) + 4);
 
-        *((uint32_t *)(REMAP_TABLE_ADDR + 4*comp_index)) = (((LITTLE_ENDIAN(remap_instr) & 0x0000FFFF) << 16) | (old_instr[0] & 0x0000FFFF));
-        *((uint32_t *)(REMAP_TABLE_ADDR + 4*(comp_index+1))) = ((old_instr[1] & 0xFFFF0000) | ((LITTLE_ENDIAN(remap_instr) & 0xFFFF0000) >> 16));
+        uint32_t instr1 = (((remap_instr & 0x0000FFFF) << 16) | (old_instr[0] & 0x0000FFFF));
+        uint32_t instr2 = ((old_instr[1] & 0xFFFF0000) | ((remap_instr & 0xFFFF0000) >> 16));
+
+        //Updating remap table in SRAM and FLASH
+        *((uint32_t *)(REMAP_TABLE_ADDR + 4*comp_index)) = instr1; 
+        *((uint32_t *)(REMAP_TABLE_ADDR + 4*(comp_index+1))) = instr2;
+        FlashProgram(&instr1, FLASH_REMAP_TABLE+4*comp_index, 4);
+        FlashProgram(&instr2, FLASH_REMAP_TABLE+4*comp_index+4, 4);
+
+        //Update counter list in SRAM and FLASH
+        counter++;
+        FlashProgram(&counter, FLASH_NO_OF_COUNTERS, 4);
+        counter++;
+        FlashProgram(&counter, FLASH_NO_OF_COUNTERS, 4);
     }
     return;
 }
-
-
-volatile uint32_t old_instruction_address;
-volatile uint32_t new_instruction_address;
-volatile uint8_t counter = 0;
-volatile uint8_t link;
 
 
 void hera_fpb_setup(){
@@ -204,6 +234,25 @@ void turn_blue_on()
 void setup()
 {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+
+/******************************************/
+    counter = *((uint32_t *)FLASH_NO_OF_COUNTERS) & 0xFF;
+    if (counter > 6) counter = 0;
+
+    for (uint8_t i = 0; i < counter; i++){
+        HWREG(FPB_CTRL_REGISTER) |= 0x03;
+        HWREG(FPB_REMAP_REGISTER) = REMAP_TABLE_ADDR;
+        *((uint32_t *)(REMAP_TABLE_ADDR + 4*i)) = *((uint32_t *)(FLASH_REMAP_TABLE + 4*i));
+    }
+
+    if (counter >= 1)       HWREG(FPB_COMP0) = *((uint32_t *)(FLASH_COMP_TABLE + 0));
+    if (counter >= 2)       HWREG(FPB_COMP1) = *((uint32_t *)(FLASH_COMP_TABLE + 4)); 
+    if (counter >= 3)       HWREG(FPB_COMP2) = *((uint32_t *)(FLASH_COMP_TABLE + 8));
+    if (counter >= 4)       HWREG(FPB_COMP3) = *((uint32_t *)(FLASH_COMP_TABLE + 12)); 
+    if (counter >= 5)       HWREG(FPB_COMP4) = *((uint32_t *)(FLASH_COMP_TABLE + 16));
+    if (counter == 6)       HWREG(FPB_COMP5) = *((uint32_t *)(FLASH_COMP_TABLE + 20)); 
+/******************************************/
+
     uart_init();
 }
 
@@ -251,15 +300,14 @@ void loop()
         uint8_t send_patch = 0x44;
         uart_write(UART0_BASE, &send_patch, 1);            
 
-        uint8_t number_of_blocks = patch_length/4;
-        for (uint32_t i = 0; i < number_of_blocks; i++){
+        for (uint32_t i = 0; i < patch_length; i=i+4){
             
-            uart_read(UART0_BASE, patch+4*i, 4);
+            uart_read(UART0_BASE, patch+i, 4);
 
             uint8_t send_feedback = 0x43;
             uart_write(UART0_BASE, &send_feedback, 1);
             
-            int done = FlashProgram(patch+4*i, new_instruction_address + 4*i, 4);
+            int done = FlashProgram(patch+i, new_instruction_address + i, 4);
             if (done == -1) GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1);
         }
         
