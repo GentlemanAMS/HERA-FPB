@@ -215,69 +215,66 @@ volatile bool always_true = true;
 uint8_t patch[256];
 void loop()
 {
-
-    while(always_true){    
         
-        if(uart_read_avail(UART0_BASE)){
+    if(uart_read_avail(UART0_BASE)){
 
-            uint8_t start_byte;
-            while(true){
-                uart_read(UART0_BASE, &start_byte, 1);
-                if (start_byte == 0x55)
-                    break;
-            }
-
-            uint8_t data[4];
-            uart_read(UART0_BASE, data, 4);
-            old_instruction_address = data[0];
-            old_instruction_address = (old_instruction_address << 8) | data[1];
-            old_instruction_address = (old_instruction_address << 8) | data[2];
-            old_instruction_address = (old_instruction_address << 8) | data[3];
-
-            uart_read(UART0_BASE, data, 4);
-            new_instruction_address = data[0];
-            new_instruction_address = (new_instruction_address << 8) | data[1];
-            new_instruction_address = (new_instruction_address << 8) | data[2];
-            new_instruction_address = (new_instruction_address << 8) | data[3];
-
-            FlashErase(new_instruction_address);
-
-            uart_read(UART0_BASE, &link, 1);
-
-            uint8_t send_length = 0x44;
-            uart_write(UART0_BASE, &send_length, 1);
-
-            uint8_t patch_length;
-            uart_read(UART0_BASE, &patch_length, 1);
-
-            uint8_t send_patch = 0x44;
-            uart_write(UART0_BASE, &send_patch, 1);            
-
-            uint8_t number_of_blocks = patch_length/4;
-            for (uint32_t i = 0; i < number_of_blocks; i++){
-                
-                uart_read(UART0_BASE, patch+4*i, 4);
-
-                uint8_t send_feedback = 0x43;
-                uart_write(UART0_BASE, &send_feedback, 1);
-                
-                int done = FlashProgram(patch+4*i, new_instruction_address + 4*i, 4);
-                if (done == -1) GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1);
-            }
-            
-            hera_fpb_setup();
-            counter++;
+        uint8_t start_byte;
+        while(true){
+            uart_read(UART0_BASE, &start_byte, 1);
+            if (start_byte == 0x55)
+                break;
         }
 
-        turn_blue_on();
-        for (delay = 0; delay < DELAY; delay++);
+        uint8_t data[4];
+        uart_read(UART0_BASE, data, 4);
+        old_instruction_address = data[0];
+        old_instruction_address = (old_instruction_address << 8) | data[1];
+        old_instruction_address = (old_instruction_address << 8) | data[2];
+        old_instruction_address = (old_instruction_address << 8) | data[3];
+
+        uart_read(UART0_BASE, data, 4);
+        new_instruction_address = data[0];
+        new_instruction_address = (new_instruction_address << 8) | data[1];
+        new_instruction_address = (new_instruction_address << 8) | data[2];
+        new_instruction_address = (new_instruction_address << 8) | data[3];
+
+        FlashErase(new_instruction_address);
+
+        uart_read(UART0_BASE, &link, 1);
+
+        uint8_t send_length = 0x44;
+        uart_write(UART0_BASE, &send_length, 1);
+
+        uint8_t patch_length;
+        uart_read(UART0_BASE, &patch_length, 1);
+
+        uint8_t send_patch = 0x44;
+        uart_write(UART0_BASE, &send_patch, 1);            
+
+        uint8_t number_of_blocks = patch_length/4;
+        for (uint32_t i = 0; i < number_of_blocks; i++){
+            
+            uart_read(UART0_BASE, patch+4*i, 4);
+
+            uint8_t send_feedback = 0x43;
+            uart_write(UART0_BASE, &send_feedback, 1);
+            
+            int done = FlashProgram(patch+4*i, new_instruction_address + 4*i, 4);
+            if (done == -1) GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1);
+        }
         
-        turn_blue_on();
-        for (delay = 0; delay < DELAY; delay++);
-        
-        turn_blue_on();
-        for (delay = 0; delay < DELAY; delay++);
+        hera_fpb_setup();
+        counter++;
     }
+
+    turn_blue_on();
+    for (delay = 0; delay < DELAY; delay++);
+    
+    turn_blue_on();
+    for (delay = 0; delay < DELAY; delay++);
+    
+    turn_blue_on();
+    for (delay = 0; delay < DELAY; delay++);
 }
 
 
