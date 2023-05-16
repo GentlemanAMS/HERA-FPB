@@ -242,7 +242,6 @@ void loop()
 
             FlashErase(new_instruction_address);
 
-            uint8_t link;
             uart_read(UART0_BASE, &link, 1);
 
             uint8_t send_length = 0x44;
@@ -254,14 +253,15 @@ void loop()
             uint8_t send_patch = 0x44;
             uart_write(UART0_BASE, &send_patch, 1);            
 
-            for (uint32_t i = 0; i < patch_length; i=i+4){
+            uint8_t number_of_blocks = patch_length/4;
+            for (uint32_t i = 0; i < number_of_blocks; i++){
                 
-                uart_read(UART0_BASE, patch+4, 4);
+                uart_read(UART0_BASE, patch+4*i, 4);
 
                 uint8_t send_feedback = 0x43;
                 uart_write(UART0_BASE, &send_feedback, 1);
                 
-                int done = FlashProgram(patch+4, new_instruction_address + i, 4);
+                int done = FlashProgram(patch+4*i, new_instruction_address + 4*i, 4);
                 if (done == -1) GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1);
             }
             
