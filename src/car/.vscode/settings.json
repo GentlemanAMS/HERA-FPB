@@ -7,4 +7,5 @@
     "cortex-debug.armToolchainPath": "/usr/bin/arm-none-eabi-gcc",
     "cortex-debug.gdbPath": "/usr/bin/gdb-multiarch",
     "cortex-debug.objdumpPath": "/usr/bin/arm-none-eabi-objdump",
+    "C_Cpp.errorSquiggles": "disabled",
 }

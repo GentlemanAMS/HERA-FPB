@@ -39,8 +39,6 @@ bool uart_read_avail(uint32_t uart_port);
  * @param uart_port : UART1_BASE or UART0_BASE
  * @param buffer : received bytes is filled into this buffer
  * @param buffer_length : number of bytes expected to be received
- * @param timeout : time before which all bytes must be received
- * @return int32_t : -1 if expected bytes are not received - 0 when received
  */
 void uart_read(uint32_t uart_port, uint8_t* buffer, uint32_t buffer_length);
 

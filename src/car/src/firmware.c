@@ -9,6 +9,7 @@
 #include "driverlib/gpio.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
+#include "driverlib/flash.h"
 
 #include "uart.h"
 #include "time.h"
@@ -190,33 +191,11 @@ void hera_fpb_setup(){
 }
 
 
-
-void turn_red_on()
-{
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1); // r
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
-}
-
 void turn_blue_on()
 {
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, GPIO_PIN_2); // b
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
-}
-
-void turn_green_on()
-{
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3); // g
-}
-
-void turn_all_off()
-{
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
-    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g    
 }
 
 /************
@@ -232,6 +211,8 @@ volatile int delay;
 #define DELAY 0xFFFFF
 volatile bool always_true = true;
 
+
+uint8_t patch[256];
 void loop()
 {
 
@@ -239,14 +220,14 @@ void loop()
         
         if(uart_read_avail(UART0_BASE)){
 
-            uint8_t data[4];
-
+            uint8_t start_byte;
             while(true){
-                uart_read(UART0_BASE, data, 1);
-                if (*data == 0x55)
+                uart_read(UART0_BASE, &start_byte, 1);
+                if (start_byte == 0x55)
                     break;
             }
 
+            uint8_t data[4];
             uart_read(UART0_BASE, data, 4);
             old_instruction_address = data[0];
             old_instruction_address = (old_instruction_address << 8) | data[1];
@@ -259,9 +240,33 @@ void loop()
             new_instruction_address = (new_instruction_address << 8) | data[2];
             new_instruction_address = (new_instruction_address << 8) | data[3];
 
-            uart_read(UART0_BASE, data, 1);
-            link = data[0];
+            FlashErase(new_instruction_address);
 
+            uint8_t link;
+            uart_read(UART0_BASE, &link, 1);
+
+            uint8_t send_length = 0x44;
+            uart_write(UART0_BASE, &send_length, 1);
+
+            uint8_t patch_length;
+            uart_read(UART0_BASE, &patch_length, 1);
+
+            uint8_t send_patch = 0x44;
+            uart_write(UART0_BASE, &send_patch, 1);            
+
+            uint8_t number_of_blocks = patch_length/4;
+
+            for (uint32_t i = 0; i < number_of_blocks; i++){
+                
+                uart_read(UART0_BASE, patch+4*i, 4);
+
+                uint8_t send_feedback = 0x43;
+                uart_write(UART0_BASE, &send_feedback, 1);
+                
+                int done = FlashProgram(patch+4*i, (new_instruction_address + 4*i), 4);
+                if (done == -1) GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1);
+            }
+            
             hera_fpb_setup();
             counter++;
         }
@@ -269,20 +274,18 @@ void loop()
         turn_blue_on();
         for (delay = 0; delay < DELAY; delay++);
         
-        turn_red_on();
+        turn_blue_on();
         for (delay = 0; delay < DELAY; delay++);
         
-        turn_all_off();
+        turn_blue_on();
         for (delay = 0; delay < DELAY; delay++);
     }
 }
+
 
 int main(void){
     setup();
     while(always_true)
         loop();
     turn_blue_on();
-    turn_red_on();
-    turn_green_on();
-    turn_all_off();
 }
