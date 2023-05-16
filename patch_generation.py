@@ -1,4 +1,4 @@
-gpio_pin_write_addr = 0x0000890c                     #GPIOPinWrite()
+gpio_pin_write_addr = 0x00008904                     #GPIOPinWrite()
 instr_addr          = 0x00024000                        #Instruction where it starts
 
 b1 = instr_addr & 0xFF
@@ -6,7 +6,6 @@ b2 = (instr_addr & 0xFF00) >> 8
 b3 = (instr_addr & 0xFF0000) >> 16
 b4 = (instr_addr & 0xFF000000) >> 24
 new_instruction_address = bytearray([b4, b3, b2, b1])
-print(new_instruction_address)
 
 
 def calculate_b_instr(target_instr_addr, curr_instr_addr):
@@ -198,9 +197,9 @@ print("Version Update: \n")
 print("Choose current function to update: 1, 2 or 3")
 func = input()
 
-call_function_1 = bytearray(b'\x00\x00\x83\xd6')
-call_function_2 = bytearray(b'\x00\x00\x83\xe6')
-call_function_3 = bytearray(b'\x00\x00\x83\xf6')
+call_function_1 = bytearray(b'\x00\x00\x83\xd4')
+call_function_2 = bytearray(b'\x00\x00\x83\xe4')
+call_function_3 = bytearray(b'\x00\x00\x83\xf4')
 
 if func == '1':
     old_instruction_address = call_function_1
