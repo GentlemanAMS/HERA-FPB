@@ -9,10 +9,7 @@ from fpb_tools.utils import run_shell, get_logger, zip_step_returns, HandlerRet
 from fpb_tools.device import FW_FLASH_SIZE, FW_EEPROM_SIZE
 from fpb_tools.subparsers import (
     SubparserBuildEnv,
-    SubparserBuildTools,
-    SubparserBuildDepl,
     SubparserBuildCarFobPair,
-    SubparserBuildFob,
 )
 
 
@@ -54,45 +51,14 @@ async def env(
     return logs.encode(), b""
 
 
-async def depl(
-    design: Path,
-    name: str,
-    deployment: str,
-    image: str = SubparserBuildDepl.image,
-    depl_in: Path = SubparserBuildDepl.depl_in,
-    logger: logging.Logger = None,
-) -> HandlerRet:
-    tag = f"{image}:{name}"
-    logger = logger or get_logger()
-    logger.info(f"{tag}: Building deployment {deployment}")
-    depl_dir = str(design.resolve() / depl_in)
-    output = await run_shell(
-        "docker run"
-        f' -v "{depl_dir}":/depl_in:ro'
-        f" -v {image}.{name}.{deployment}.secrets.vol:/secrets"
-        " --workdir=/depl_in"
-        f" {tag} make SECRETS_DIR=/secrets"
-    )
-    logger.info(f"{tag}: Built deployment {deployment}")
-    return output
-
-
 async def car_fob_pair(
     design: Path,
     name: str,
     deployment: str,
     car_name: str,
-    fob_name: str,
     car_out: Path,
-    fob_out: Path,
     car_id: int,
-    pair_pin: int,
     car_in: Path = SubparserBuildCarFobPair.car_in,
-    fob_in: Path = SubparserBuildCarFobPair.fob_in,
-    car_unlock_secret: str = SubparserBuildCarFobPair.car_unlock_secret,
-    car_feature1_secret: str = SubparserBuildCarFobPair.car_feature1_secret,
-    car_feature2_secret: str = SubparserBuildCarFobPair.car_feature2_secret,
-    car_feature3_secret: str = SubparserBuildCarFobPair.car_feature3_secret,
     image: str = SubparserBuildCarFobPair.image,
     logger: logging.Logger = None,
 ) -> HandlerRet:

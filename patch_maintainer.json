@@ -2,12 +2,12 @@
     "function_1": {
         "version_number": 1,
         "old_version": "blue",
-        "current_version": "switched_off"
+        "current_version": "green"
     },
     "function_2": {
         "version_number": 1,
         "old_version": "blue",
-        "current_version": "green"
+        "current_version": "blue"
     },
     "function_3": {
         "version_number": 1,
