@@ -34,7 +34,7 @@ class BuildDevParser(BuildParser):
     deployment: str  # name of the deployment
 
 
-class SubparserBuildCarFobPair(BuildDevParser, cmd="build.car_fob_pair"):
+class SubparserBuildFirmware(BuildDevParser, cmd="build.build_firmware"):
     """Build a car and paired fob pair"""
 
     car_name: str  # name of the car output files
@@ -49,10 +49,3 @@ class SubparserDevLoadHW(fpbTap, cmd="device.load_hw"):
     dev_name: str  # name of the device
     dev_serial: str  # specify the serial port
 
-
-
-class SubparserDevBridge(fpbTap, cmd="device.bridge"):
-    """Start a serial-to-socket bridge"""
-
-    bridge_id: int  # Bridge ID to set up
-    dev_serial: str  # serial port to open

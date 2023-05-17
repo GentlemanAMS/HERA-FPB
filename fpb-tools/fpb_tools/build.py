@@ -9,7 +9,7 @@ from fpb_tools.utils import run_shell, get_logger, zip_step_returns, HandlerRet
 from fpb_tools.device import FW_FLASH_SIZE, FW_EEPROM_SIZE
 from fpb_tools.subparsers import (
     SubparserBuildEnv,
-    SubparserBuildCarFobPair,
+    SubparserBuildFirmware,
 )
 
 
@@ -51,14 +51,14 @@ async def env(
     return logs.encode(), b""
 
 
-async def car_fob_pair(
+async def build_firmware(
     design: Path,
     name: str,
     deployment: str,
     car_name: str,
     car_out: Path,
-    car_in: Path = SubparserBuildCarFobPair.car_in,
-    image: str = SubparserBuildCarFobPair.image,
+    car_in: Path = SubparserBuildFirmware.car_in,
+    image: str = SubparserBuildFirmware.image,
     logger: logging.Logger = None,
 ) -> HandlerRet:
     """
