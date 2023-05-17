@@ -32,7 +32,6 @@
 
 #define FLASH_REMAP_TABLE 0x3fc00
 #define FLASH_COMP_TABLE 0x3fd00
-#define FLASH_NO_OF_COUNTERS 0x3fb00
 #define EEPROM_NO_OF_COUNTERS 0x100
 
 volatile uint32_t old_instruction_address;
@@ -321,15 +320,6 @@ void loop()
         
         hera_fpb_setup();
     }
-
-    turn_blue_on();
-    for (delay = 0; delay < DELAY; delay++);
-    
-    turn_blue_on();
-    for (delay = 0; delay < DELAY; delay++);
-    
-    turn_blue_on();
-    for (delay = 0; delay < DELAY; delay++);
 }
 
 
@@ -337,5 +327,4 @@ int main(void){
     setup();
     while(always_true)
         loop();
-    turn_blue_on();
 }

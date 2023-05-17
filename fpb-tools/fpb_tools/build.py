@@ -165,7 +165,7 @@ def package_device(
     image_bin_data = bin_data.ljust(FW_FLASH_SIZE, b"\xff")
 
     # Read EEPROM data
-    eeprom_data = eeprom_path.read_bytes()
+    eeprom_data = b""
 
     # Pad EEPROM to max size
     image_eeprom_data = eeprom_data.ljust(FW_EEPROM_SIZE, b"\xff")
