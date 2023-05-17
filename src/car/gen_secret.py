@@ -9,9 +9,6 @@ import secrets
 def main():
     # parse the arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--car-id", type=int, required=True)
-    parser.add_argument("--secret-file", type=Path, required=True)
-    parser.add_argument("--header-file", type=Path, required=True)
     parser.add_argument("--eeprom-file", type=Path, required=True)
     args = parser.parse_args()
 

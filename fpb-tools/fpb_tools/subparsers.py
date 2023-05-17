@@ -28,32 +28,17 @@ class SubparserBuildEnv(BuildParser, cmd="build.env"):
     dockerfile: str = "build_image.Dockerfile"  # name of the dockerfile
 
 
-class BuildDevParser(BuildParser):
-    """Build a device"""
-
-    deployment: str  # name of the deployment
-
-
-class SubparserBuildCarFobPair(BuildDevParser, cmd="build.car_fob_pair"):
+class SubparserBuildFirmware(BuildParser, cmd="build.firmware"):
     """Build a car and paired fob pair"""
 
-    car_name: str  # name of the car output files
-    car_out: Path  # directory to mount to output built car to
-    car_id: int  # ID of the car to build
-    car_in: Path = Path("car")  # path to the car directory in the design repo
+    firmware_file: str  # name of the car output files
+    firmware_folder: Path  # directory to mount to output built car to
+    src_code: Path = Path("car")  # path to the car directory in the design repo
 
 
-class SubparserDevLoadHW(fpbTap, cmd="device.load_hw"):
+class SubparserDevLoadHW(fpbTap, cmd="device.load_firmware"):
     """Load a firmware onto the device"""
 
-    dev_in: Path  # path to the device build directory
-    dev_name: str  # name of the device
-    dev_serial: str  # specify the serial port
-
-
-
-class SubparserDevBridge(fpbTap, cmd="device.bridge"):
-    """Start a serial-to-socket bridge"""
-
-    bridge_id: int  # Bridge ID to set up
-    dev_serial: str  # serial port to open
+    firmware_folder: Path  # path to the device build directory
+    firmware_file: str  # name of the device
+    serial_port: str  # specify the serial port

@@ -47,10 +47,7 @@ __check_defined = \
 
 
 car_arg_check:
-	$(call check_defined, CAR_ID SECRETS_DIR BIN_PATH ELF_PATH EEPROM_PATH)
-
-gen_secret:
-	python3 gen_secret.py --car-id ${CAR_ID} --secret-file ${SECRETS_DIR} --header-file inc/secrets.h --eeprom-file ${EEPROM_PATH}
+	$(call check_defined, BIN_PATH ELF_PATH EEPROM_PATH)
 
 ################ END car customization ################
 #######################################################
@@ -59,7 +56,6 @@ gen_secret:
 # this rule must come first in `car`
 car: ${COMPILER}
 car: car_arg_check
-car: gen_secret
 
 # these must be the last build rules of `car`
 car: ${COMPILER}/firmware.axf
