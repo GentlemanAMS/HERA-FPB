@@ -73,20 +73,20 @@ def verify_resp(ser: Serial, expected: BootloaderResponseCode):
 
 
 async def load_hw(
-    dev_in: Path, dev_name: str, dev_serial: str, logger: logging.Logger = None,
+    folder: Path, filename: str, serial_port: str, logger: logging.Logger = None,
 ) -> HandlerRet:
     # Usage: Turn on the device holding SW2, then start this script
 
     logger = logger or get_logger()
 
     # Set up file references
-    image_path = dev_in / f"{dev_name}.img"
+    image_path = folder / f"{filename}.img"
 
     # Try to connect to the serial port
-    logger.info(f"Connecting to serial port {dev_serial}...")
-    ser = Serial(dev_serial, 115200, timeout=2)
+    logger.info(f"Connecting to serial port {serial_port}...")
+    ser = Serial(serial_port, 115200, timeout=2)
     ser.reset_input_buffer()
-    logger.info(f"Connection opened on {dev_serial}")
+    logger.info(f"Connection opened on {serial_port}")
 
     # Open firmware
     logger.info("Reading image file...")

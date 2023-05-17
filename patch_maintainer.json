@@ -5,14 +5,14 @@
         "current_version": "blue"
     },
     "function_2": {
-        "version_number": 1,
-        "old_version": "blue",
-        "current_version": "red"
-    },
-    "function_3": {
         "version_number": 0,
         "old_version": "blue",
         "current_version": "blue"
+    },
+    "function_3": {
+        "version_number": 1,
+        "old_version": "blue",
+        "current_version": "green"
     },
     "patch_address": 151552
 }

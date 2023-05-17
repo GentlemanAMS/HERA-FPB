@@ -46,20 +46,20 @@ __check_defined = \
 	  $(error Undefined $1))
 
 
-car_arg_check:
+target_firmware_arg_check:
 	$(call check_defined, BIN_PATH ELF_PATH EEPROM_PATH)
 
 ################ END car customization ################
 #######################################################
 
 
-# this rule must come first in `car`
-car: ${COMPILER}
-car: car_arg_check
+# this rule must come first in `target_firmware`
+target_firmware: ${COMPILER}
+target_firmware: target_firmware_arg_check
 
-# these must be the last build rules of `car`
-car: ${COMPILER}/firmware.axf
-car: copy_artifacts
+# these must be the last build rules of `target_firmware`
+target_firmware: ${COMPILER}/firmware.axf
+target_firmware: copy_artifacts
 
 
 # build libraries

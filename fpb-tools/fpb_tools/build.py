@@ -54,35 +54,34 @@ async def env(
 async def build_firmware(
     design: Path,
     name: str,
-    deployment: str,
-    car_name: str,
-    car_out: Path,
-    car_in: Path = SubparserBuildFirmware.car_in,
+    filename: str,
+    folder: Path,
+    src_path: Path = SubparserBuildFirmware.src_path,
     image: str = SubparserBuildFirmware.image,
     logger: logging.Logger = None,
 ) -> HandlerRet:
     """
-    Build car and paired fob pair
+    Build Firmware
     """
 
     # Image information
     tag = f"{image}:{name}"
     logger = logger or get_logger()
-    logger.info(f"{tag}:{deployment}: Building car {car_name}")
+    logger.info(f"Building firmware {filename}")
 
-    # Build car
-    car_output = await make_dev(
+    # Build Firmware
+    output = await make_dev(
         image=image,
         name=name,
         design=design,
-        firmware_file=car_name,
-        src_in=car_in,
-        firmware_folder=car_out,
-        make_target="car",
+        firmware_file=filename,
+        src_in=src_path,
+        firmware_folder=folder,
+        make_target="target_firmware",
         logger=logger,
     )
 
-    return zip_step_returns([car_output])
+    return zip_step_returns([output])
 
 
 
