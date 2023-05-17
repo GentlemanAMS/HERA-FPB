@@ -1,0 +1,2 @@
+[console_scripts]
+fpb_tools = fpb_tools.__main__:main
