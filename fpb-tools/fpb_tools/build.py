@@ -120,72 +120,11 @@ async def car_fob_pair(
         defines=car_defines,
         make_target="car",
         logger=logger,
-        replace_secrets=True,
-        unlock_secret=car_unlock_secret,
-        feature1_secret=car_feature1_secret,
-        feature2_secret=car_feature2_secret,
-        feature3_secret=car_feature3_secret,
     )
 
-    # Fob defines
-    fob_defines = f" CAR_ID={car_id}" f" PAIR_PIN={pair_pin}"
-
-    # Build fob
-    fob_output = await make_dev(
-        image=image,
-        name=name,
-        design=design,
-        deployment=deployment,
-        dev_name=fob_name,
-        dev_in=fob_in,
-        dev_out=fob_out,
-        defines=fob_defines,
-        make_target="paired_fob",
-        logger=logger,
-        replace_secrets=False,
-    )
-
-    return zip_step_returns([car_output, fob_output])
+    return zip_step_returns([car_output])
 
 
-async def fob(
-    design: Path,
-    name: str,
-    deployment: str,
-    fob_name: str,
-    fob_out: Path,
-    image: str = SubparserBuildFob.image,
-    fob_in: Path = SubparserBuildFob.fob_in,
-    logger: logging.Logger = None,
-) -> HandlerRet:
-    """
-    Build unpaired fob firmware
-    """
-
-    # Image information
-    tag = f"{image}:{name}"
-    logger = logger or get_logger()
-    logger.info(f"{tag}:{deployment}: Building unpaired fob {fob_name}")
-
-    # Unpaired fob defines
-    fob_defines = ""
-
-    # Build fob
-    output = await make_dev(
-        image=image,
-        name=name,
-        design=design,
-        deployment=deployment,
-        dev_name=fob_name,
-        dev_in=fob_in,
-        dev_out=fob_out,
-        defines=fob_defines,
-        make_target="unpaired_fob",
-        logger=logger,
-        replace_secrets=False,
-    )
-
-    return output
 
 
 async def make_dev(
@@ -199,11 +138,6 @@ async def make_dev(
     defines: str,
     make_target: str,
     logger: logging.Logger,
-    replace_secrets: bool,
-    unlock_secret: str = "Car Unlocked",
-    feature1_secret: str = "Feature 1 Enabled: Heated Seats",
-    feature2_secret: str = "Feature 2 Enabled: Extended Range",
-    feature3_secret: str = "Feature 3 Enabled: Valet Mode",
 ) -> HandlerRet:
     """
     Build device firmware
@@ -252,12 +186,7 @@ async def make_dev(
     package_device(
         bin_path,
         eeprom_path,
-        image_path,
-        replace_secrets,
-        unlock_secret,
-        feature1_secret,
-        feature2_secret,
-        feature3_secret,
+        image_path
     )
 
     logger.info(f"{tag}:{deployment}: Packaged device {dev_name} image")
@@ -269,11 +198,6 @@ def package_device(
     bin_path: Path,
     eeprom_path: Path,
     image_path: Path,
-    replace_secrets: bool,
-    unlock_secret: str,
-    feature1_secret: str,
-    feature2_secret: str,
-    feature3_secret: str,
 ):
     """
     Package a device image for use with the bootstrapper
@@ -291,42 +215,6 @@ def package_device(
 
     # Pad EEPROM to max size
     image_eeprom_data = eeprom_data.ljust(FW_EEPROM_SIZE, b"\xff")
-
-    # Put secrets in EEPROM if used
-    if replace_secrets:
-        # Convert secrets to bytes
-        unlock_secret = unlock_secret.encode()
-        feature1_secret = feature1_secret.encode()
-        feature2_secret = feature2_secret.encode()
-        feature3_secret = feature3_secret.encode()
-
-        # Check secret lengths
-        if len(unlock_secret) > 64:
-            raise Exception(f"Unlock secret too long ({len(unlock_secret)} > 64)")
-
-        if len(feature1_secret) > 64:
-            raise Exception(f"Feature 1 secret too long ({len(feature1_secret)} > 64)")
-
-        if len(feature2_secret) > 64:
-            raise Exception(f"Feature 2 secret too long ({len(feature2_secret)} > 64)")
-
-        if len(feature3_secret) > 64:
-            raise Exception(f"Feature 3 secret too long ({len(feature3_secret)} > 64)")
-
-        # Pad secrets to 64 bytes
-        unlock_secret = unlock_secret.ljust(64, b".")
-        feature1_secret = feature1_secret.ljust(64, b".")
-        feature2_secret = feature2_secret.ljust(64, b".")
-        feature3_secret = feature3_secret.ljust(64, b".")
-
-        # Replace end of EEPROM data with secret values
-        image_eeprom_data = (
-            image_eeprom_data[: FW_EEPROM_SIZE - 256]
-            + feature3_secret
-            + feature2_secret
-            + feature1_secret
-            + unlock_secret
-        )
 
     # Create phys_image.bin
     image_data = image_bin_data + image_eeprom_data
