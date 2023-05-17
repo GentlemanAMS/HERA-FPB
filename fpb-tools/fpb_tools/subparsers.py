@@ -33,7 +33,7 @@ class SubparserBuildFirmware(BuildParser, cmd="build.build_firmware"):
 
     filename: str  # name of the firmware output files
     folder: Path  # directory to mount to output built firmware files to
-    src_path: Path = Path("car")  # path to the source directory in the design repo
+    src_path: Path = Path("src_code")  # path to the source directory in the design repo
 
 
 class SubparserDevLoadHW(fpbTap, cmd="device.load_hw"):
