@@ -3,11 +3,11 @@ print("\nVersion Update: \n")
 
 
 
-gpio_pin_write_addr = 0x89f8                     #GPIOPinWrite()
+gpio_pin_write_addr = 0x8c9c                     #GPIOPinWrite()
 
-call_function_1_addr = 0x84c0
-call_function_2_addr = 0x84d0
-call_function_3_addr = 0x84e0
+call_function_1_addr = 0x84e0
+call_function_2_addr = 0x84f0
+call_function_3_addr = 0x8500
 
 
 
@@ -200,7 +200,7 @@ print("Patch Update Completed")
 updates_info[function_to_be_updated]["version_number"] = 1
 updates_info[function_to_be_updated]["old_version"] = "blue"
 updates_info[function_to_be_updated]["current_version"] = new_updated_function
-updates_info["patch_address"] = updates_info["patch_address"] + 0xFFF 
+updates_info["patch_address"] = updates_info["patch_address"] + 0x1000 
 
 with open("patch_maintainer.json", "w") as fp:
     json.dump(updates_info, fp, indent=4)

@@ -10,6 +10,7 @@
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/flash.h"
+#include "driverlib/eeprom.h"
 
 #include "uart.h"
 #include "time.h"
@@ -32,10 +33,10 @@
 #define FLASH_REMAP_TABLE 0x3fc00
 #define FLASH_COMP_TABLE 0x3fd00
 #define FLASH_NO_OF_COUNTERS 0x3fb00
+#define EEPROM_NO_OF_COUNTERS 0x100
 
 volatile uint32_t old_instruction_address;
 volatile uint32_t new_instruction_address;
-uint32_t counter;
 volatile uint8_t link;
 
 
@@ -179,10 +180,10 @@ void hera_remap_instr(
         *((uint32_t *)(REMAP_TABLE_ADDR + 4*comp_index)) = remap_instr;
         FlashProgram(&remap_instr, FLASH_REMAP_TABLE+4*comp_index, 4);
 
-        //Update counter list in SRAM and FLASH
-        counter++;
-        FlashProgram(&counter, FLASH_NO_OF_COUNTERS, 4);
-
+        uint32_t counter;
+        EEPROMRead(&counter, EEPROM_NO_OF_COUNTERS, 4);
+        counter = counter + 1;
+        EEPROMProgram(&counter, EEPROM_NO_OF_COUNTERS, 4);
     }
 
     // Half-aligned : pain in the arse
@@ -204,11 +205,10 @@ void hera_remap_instr(
         FlashProgram(&instr1, FLASH_REMAP_TABLE+4*comp_index, 4);
         FlashProgram(&instr2, FLASH_REMAP_TABLE+4*comp_index+4, 4);
 
-        //Update counter list in SRAM and FLASH
-        counter++;
-        FlashProgram(&counter, FLASH_NO_OF_COUNTERS, 4);
-        counter++;
-        FlashProgram(&counter, FLASH_NO_OF_COUNTERS, 4);
+        uint32_t counter;
+        EEPROMRead(&counter, EEPROM_NO_OF_COUNTERS, 4);
+        counter = counter + 2;
+        EEPROMProgram(&counter, EEPROM_NO_OF_COUNTERS, 4);
     }
     return;
 }
@@ -217,6 +217,8 @@ void hera_remap_instr(
 void hera_fpb_setup(){
     enable_fpb_control_register();
     set_fpb_remap_table_address();
+    uint32_t counter;
+    EEPROMRead(&counter, EEPROM_NO_OF_COUNTERS, 4);
     hera_remap_instr(old_instruction_address, new_instruction_address, counter, link);
 }
 
@@ -236,8 +238,14 @@ void setup()
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
 
 /******************************************/
-    counter = *((uint32_t *)FLASH_NO_OF_COUNTERS) & 0xFF;
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_EEPROM0);
+    EEPROMInit();
+
+    uint32_t counter;
+    EEPROMRead(&counter, EEPROM_NO_OF_COUNTERS, 4);
+    counter = counter & 0xFF;
     if (counter > 6) counter = 0;
+    EEPROMProgram(&counter, EEPROM_NO_OF_COUNTERS, 4);
 
     for (uint8_t i = 0; i < counter; i++){
         HWREG(FPB_CTRL_REGISTER) |= 0x03;
@@ -312,7 +320,6 @@ void loop()
         }
         
         hera_fpb_setup();
-        counter++;
     }
 
     turn_blue_on();

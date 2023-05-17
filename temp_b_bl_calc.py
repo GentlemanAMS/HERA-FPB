@@ -26,6 +26,6 @@ def calculate_b_instr(target_instr_addr, curr_instr_addr):
 
     return b_instr
 
-tia = 0x8904
-cia = 0x82b6
+tia = 0x24000
+cia = 0x84cc
 print(calculate_b_instr(tia, cia))
