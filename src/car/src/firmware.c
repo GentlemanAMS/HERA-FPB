@@ -35,7 +35,7 @@
 
 volatile uint32_t old_instruction_address;
 volatile uint32_t new_instruction_address;
-volatile uint32_t counter = 0;
+uint32_t counter;
 volatile uint8_t link;
 
 
