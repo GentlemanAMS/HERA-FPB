@@ -104,7 +104,7 @@ print("function requested version: ",new_updated_function)
 
 
 
-print("\n\nPatch Generation Starts\n")
+print("\n\nPatch Generation Starts")
 
 from patch_generator import *
 instr_addr          = updates_info["patch_address"]                        #Instruction where it starts
@@ -150,7 +150,7 @@ import serial
 import time
 ser = serial.Serial("/dev/ttyACM0", 115200)
 
-print("\n\nVersion Update starts:\n\n")
+print("Patch Update starts....")
 
 time.sleep(0.5)
 ser.write(bytearray(b'\x55'))
@@ -169,7 +169,7 @@ while(True):
     if (x == b'\x44'):
         break
 
-print("Sent Instruction Address")
+print("Sending Instruction Address")
 
 ser.write(bytearray([len(patch)]))
 
@@ -178,18 +178,25 @@ while(True):
     if (x == b'\x44'):
         break
 
-print("Sent patch size", len(patch), "\n")
+print("Sending patch size", len(patch))
 
-for i in range(len(patch)):
-    ser.write(bytearray([patch[i]]))
-    time.sleep(0.02)
-    
-    if (i % 4 == 3):
-        while(True):
-            x = ser.read(1)
-            if (x == b'\x43'):
-                break        
-        print("Block: ", i>>2 , " uploaded")
+
+from rich.progress import Progress
+
+with Progress() as progress:
+    task = progress.add_task("Sending Patch... \n", total=len(patch))
+
+    for i in range(len(patch)):
+        ser.write(bytearray([patch[i]]))
+        time.sleep(0.02)
+        
+        if (i % 4 == 3):
+            while(True):
+                x = ser.read(1)
+                if (x == b'\x43'):
+                    break        
+            # print("Block: ", i>>2 , " uploaded")
+        progress.update(task, advance=i)
 
 print("Patch Update Completed")
 

@@ -1,18 +1,18 @@
 {
     "function_1": {
-        "version_number": 0,
+        "version_number": 1,
         "old_version": "blue",
-        "current_version": "blue"
+        "current_version": "red"
     },
     "function_2": {
-        "version_number": 0,
-        "old_version": "blue",
-        "current_version": "blue"
-    },
-    "function_3": {
         "version_number": 1,
         "old_version": "blue",
         "current_version": "green"
     },
-    "patch_address": 151552
+    "function_3": {
+        "version_number": 1,
+        "old_version": "blue",
+        "current_version": "switched_off"
+    },
+    "patch_address": 159744
 }

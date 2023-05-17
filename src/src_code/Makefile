@@ -84,7 +84,6 @@ ${COMPILER}:
 # for each source file that needs to be compiled besides the file that defines `main`
 
 ${COMPILER}/firmware.axf: ${COMPILER}/uart.o
-${COMPILER}/firmware.axf: ${COMPILER}/time.o
 ${COMPILER}/firmware.axf: ${COMPILER}/firmware.o
 ${COMPILER}/firmware.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/firmware.axf: ${TIVA_ROOT}/driverlib/${COMPILER}/libdriver.a

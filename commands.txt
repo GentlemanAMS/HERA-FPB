@@ -4,16 +4,12 @@ source env/bin/activate
 python3 -m pip install --upgrade pip
 
 sudo chmod 666 /var/run/docker.sock 
-
-git clone git@github.com:mitre-cyber-academy/2023-ectf-tools.git
 python3 -m pip install -e fpb-tools
 
 python3 -m fpb_tools build.env --design src --name sse_project
-python3 -m fpb_tools build.tools --design src --name sse_project
-python3 -m fpb_tools build.depl --design src --name sse_project --deployment not_matter
 
-python3 -m fpb_tools build.car_fob_pair --design src --name sse_project --deployment not_matter --car-out fpb_demo --car-name hera_fpb --car-id 1
+python3 -m fpb_tools build.build_firmware --design src --name sse_project --folder fpb_demo --filename hera_fpb
 
-python3 -m fpb_tools device.load_hw --dev-in fpb_demo --dev-name hera_fpb --dev-serial /dev/ttyACM0
+python3 -m fpb_tools device.load_hw --folder fpb_demo --filename hera_fpb --serial-port /dev/ttyACM0
 
 
