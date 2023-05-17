@@ -54,28 +54,6 @@ async def env(
     return logs.encode(), b""
 
 
-async def tools(
-    design: Path,
-    name: str,
-    image: str = SubparserBuildTools.image,
-    tools_in: Path = SubparserBuildTools.tools_in,
-    logger: logging.Logger = None,
-) -> HandlerRet:
-    tag = f"{image}:{name}"
-    logger = logger or get_logger()
-    logger.info(f"{tag}: Building tools")
-    tool_dir = str(design.resolve() / tools_in)
-    output = await run_shell(
-        "docker run"
-        f' -v "{tool_dir}":/tools_in:ro'
-        f" -v {image}.{name}.tools.vol:/tools_out"
-        " --workdir=/tools_in"
-        f" {tag} make TOOLS_OUT_DIR=/tools_out"
-    )
-    logger.info(f"{tag}: Built tools")
-    return output
-
-
 async def depl(
     design: Path,
     name: str,

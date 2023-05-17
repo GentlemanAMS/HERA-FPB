@@ -6,7 +6,6 @@ fpb_tools/__init__.py
 fpb_tools/__main__.py
 fpb_tools/build.py
 fpb_tools/device.py
-fpb_tools/run.py
 fpb_tools/subparsers.py
 fpb_tools/utils.py
 fpb_tools.egg-info/PKG-INFO
