@@ -12,7 +12,7 @@ python3 -m fpb_tools build.env --design src --name sse_project
 python3 -m fpb_tools build.tools --design src --name sse_project
 python3 -m fpb_tools build.depl --design src --name sse_project --deployment not_matter
 
-python3 -m fpb_tools build.car_fob_pair --design src --name sse_project --deployment not_matter --car-out fpb_demo --fob-out ../temp --car-name hera_fpb --fob-name not_matter --car-id 1 --pair-pin 123455
+python3 -m fpb_tools build.car_fob_pair --design src --name sse_project --deployment not_matter --car-out fpb_demo --car-name hera_fpb --car-id 1
 
 python3 -m fpb_tools device.load_hw --dev-in fpb_demo --dev-name hera_fpb --dev-serial /dev/ttyACM0
 

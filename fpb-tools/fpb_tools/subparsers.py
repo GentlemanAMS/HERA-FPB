@@ -39,7 +39,6 @@ class SubparserBuildCarFobPair(BuildDevParser, cmd="build.car_fob_pair"):
 
     car_name: str  # name of the car output files
     car_out: Path  # directory to mount to output built car to
-    car_id: int  # ID of the car to build
     car_in: Path = Path("car")  # path to the car directory in the design repo
 
 

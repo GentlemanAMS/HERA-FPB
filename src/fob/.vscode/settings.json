@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "*.llc_repl": "cpp",
-        "sysctl.h": "c",
-        "cstdlib": "c",
-        "algorithm": "c",
-        "interrupt.h": "c"
-    }
-}

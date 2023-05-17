@@ -57,7 +57,6 @@ async def car_fob_pair(
     deployment: str,
     car_name: str,
     car_out: Path,
-    car_id: int,
     car_in: Path = SubparserBuildCarFobPair.car_in,
     image: str = SubparserBuildCarFobPair.image,
     logger: logging.Logger = None,
@@ -71,19 +70,14 @@ async def car_fob_pair(
     logger = logger or get_logger()
     logger.info(f"{tag}:{deployment}: Building car {car_name}")
 
-    # Car defines
-    car_defines = f" CAR_ID={car_id}"
-
     # Build car
     car_output = await make_dev(
         image=image,
         name=name,
         design=design,
-        deployment=deployment,
-        dev_name=car_name,
-        dev_in=car_in,
-        dev_out=car_out,
-        defines=car_defines,
+        firmware_file=car_name,
+        src_in=car_in,
+        firmware_folder=car_out,
         make_target="car",
         logger=logger,
     )
@@ -97,11 +91,9 @@ async def make_dev(
     image: str,
     name: str,
     design: str,
-    deployment: str,
-    dev_name: str,
-    dev_in: Path,
-    dev_out: Path,
-    defines: str,
+    firmware_file: str,
+    src_in: Path,
+    firmware_folder: Path,
     make_target: str,
     logger: logging.Logger,
 ) -> HandlerRet:
@@ -111,43 +103,40 @@ async def make_dev(
     tag = f"{image}:{name}"
 
     # Setup full container paths
-    bin_path = f"/dev_out/{dev_name}.bin"
-    elf_path = f"/dev_out/{dev_name}.elf"
-    eeprom_path = f"/dev_out/{dev_name}.eeprom"
-    dev_in = (design / dev_in).resolve()
-    dev_out = dev_out.resolve()
+    bin_path = f"/firmware_folder/{firmware_file}.bin"
+    elf_path = f"/firmware_folder/{firmware_file}.elf"
+    eeprom_path = f"/firmware_folder/{firmware_file}.eeprom"
+    src_in = (design / src_in).resolve()
+    firmware_folder = firmware_folder.resolve()
 
     # Create output directory
-    if not dev_out.exists():
-        logger.info(f"{tag}:{deployment}: Making output directory {dev_out}")
-        dev_out.mkdir()
+    if not firmware_folder.exists():
+        logger.info(f"Making output directory {firmware_folder}")
+        firmware_folder.mkdir()
 
     # Compile
     output = await run_shell(
         "docker run"
-        f' -v "{str(dev_in)}":/dev_in:ro'
-        f' -v "{str(dev_out)}":/dev_out'
-        f" -v {image}.{name}.{deployment}.secrets.vol:/secrets"
+        f' -v "{str(src_in)}":/src_in:ro'
+        f' -v "{str(firmware_folder)}":/firmware_folder'
         " --workdir=/root"
         f" {tag} /bin/bash -c"
         ' "'
-        " cp -r /dev_in/. /root/ &&"
+        " cp -r /src_in/. /root/ &&"
         f" make {make_target}"
-        f" {defines}"
-        f" SECRETS_DIR=/secrets"
         f" BIN_PATH={bin_path}"
         f" ELF_PATH={elf_path}"
         f" EEPROM_PATH={eeprom_path}"
         '"'
     )
 
-    logger.info(f"{tag}:{deployment}: Built device {dev_name}")
+    logger.info(f"Built device {firmware_file}")
 
     # Package image, eeprom, and secret
-    logger.info(f"{tag}:{deployment}: Packaging image for device {dev_name}")
-    bin_path = dev_out / f"{dev_name}.bin"
-    eeprom_path = dev_out / f"{dev_name}.eeprom"
-    image_path = dev_out / f"{dev_name}.img"
+    logger.info(f"Packaging image for device {firmware_file}")
+    bin_path = firmware_folder / f"{firmware_file}.bin"
+    eeprom_path = firmware_folder / f"{firmware_file}.eeprom"
+    image_path = firmware_folder / f"{firmware_file}.img"
 
     package_device(
         bin_path,
@@ -155,7 +144,7 @@ async def make_dev(
         image_path
     )
 
-    logger.info(f"{tag}:{deployment}: Packaged device {dev_name} image")
+    logger.info(f"Packaged device {firmware_file} image")
 
     return output
 
