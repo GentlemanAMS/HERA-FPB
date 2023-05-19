@@ -44,6 +44,7 @@ python3 -m fpb_tools build.build_firmware --design <PATH_TO_DESING> --name <SYST
 This step builds the binaries that can be loaded into the development boards. The `fpb_tools` will invoke the design device Makefile in the `src/src_code` folder, which places the firmware binary and EEPROM contents in an output volume. This step also packages the firmware and EEPROM contents together so they can be loaded into the device.
 
 **device.load_hw**
+
 The load stage loads a packaged device binary+EEPROM into a target device. Plug a device with the bootloader installed into your computer, and hold down the right button while turning on the power. The device will slowly flash a cyan LED, indicating it is ready to install firmware. Then start the device load step.
 ```
 python3 -m fpb_tools device.load_hw --folder <OUTPUT_VOLUME> --filename <BINARY_FILE_NAME> --serial-port <SERIAL_PORT>
