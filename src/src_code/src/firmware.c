@@ -32,6 +32,7 @@
 
 #define FLASH_REMAP_TABLE 0x3fc00
 #define FLASH_COMP_TABLE 0x3fd00
+#define FLASH_NO_OF_COUNTERS 0x3fb00
 #define EEPROM_NO_OF_COUNTERS 0x100
 
 volatile uint32_t old_instruction_address;
@@ -229,6 +230,32 @@ void turn_blue_on()
     GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
 }
 
+
+/**
+void turn_red_on()
+{
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, GPIO_PIN_1); // r
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
+}
+
+void turn_green_on()
+{
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, GPIO_PIN_3); // g
+}
+
+void turn_switch_off()
+{
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1, 0); // r
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_2, 0); // b
+    GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_3, 0); // g
+}
+ */
+
+
+
 /************
  * Functionality 
  ***********/
@@ -320,6 +347,15 @@ void loop()
         
         hera_fpb_setup();
     }
+
+    turn_blue_on();
+    for (delay = 0; delay < DELAY; delay++);
+    
+    turn_blue_on();
+    for (delay = 0; delay < DELAY; delay++);
+    
+    turn_blue_on();
+    for (delay = 0; delay < DELAY; delay++);
 }
 
 
@@ -327,4 +363,5 @@ int main(void){
     setup();
     while(always_true)
         loop();
+    turn_blue_on();
 }
