@@ -52,3 +52,25 @@ python3 -m fpb_tools device.load_hw --folder <OUTPUT_VOLUME> --filename <BINARY_
 When the install finishes, the cyan LED will be solid. Now, power cycle the device, and the LED should be solid green, showing that the firmware is running.
 
 
+
+# Presentation Video
+
+https://drive.google.com/file/d/1JudSKkRnc5fNcGtYRVtBAcMILmWfy48V/view
+
+# References
+
++ [https://www.ndss-symposium.org/wp-content/uploads/ndss2021_6B-2_24159_paper.pdf](https://www.ndss-symposium.org/wp-content/uploads/ndss2021_6B-2_24159_paper.pdf)
++ [https://www.youtube.com/watch?v=WGE2JhjrcpE&list=PLfUWWM-POgQuaImJ-0o-wxdSmVuVtkE9j&index=4](https://www.youtube.com/watch?v=WGE2JhjrcpE&list=PLfUWWM-POgQuaImJ-0o-wxdSmVuVtkE9j&index=4)
++ [https://www.doulos.com/media/1188/using_cortex-m3_fpb.pdf](https://www.doulos.com/media/1188/using_cortex-m3_fpb.pdf)
++ [https://www.youtube.com/watch?v=Ta4jED8f68U](https://www.youtube.com/watch?v=Ta4jED8f68U)
+
+Following Documentation was referred:
++ [FP_CTRL Register](https://developer.arm.com/documentation/ddi0403/d/Debug-Architecture/ARMv7-M-Debug/Flash-Patch-and-Breakpoint-unit/FlashPatch-Control-Register--FP-CTRL?lang=en)
++ [FP_REMAP Register](https://developer.arm.com/documentation/ddi0403/d/Debug-Architecture/ARMv7-M-Debug/Flash-Patch-and-Breakpoint-unit/FlashPatch-Remap-register--FP-REMAP?lang=en)
++ [FP_COMPx Register](https://developer.arm.com/documentation/ddi0403/d/Debug-Architecture/ARMv7-M-Debug/Flash-Patch-and-Breakpoint-unit/FlashPatch-Comparator-register--FP-COMPn?lang=en)
++ [B Branch Instruction](https://developer.arm.com/documentation/ddi0406/c/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/B?lang=en)
++ [BL Branch & Link Instruction](https://developer.arm.com/documentation/ddi0406/c/Application-Level-Architecture/Instruction-Details/Alphabetical-list-of-instructions/BL--BLX--immediate-?lang=en)
++ [Branch and Miscellaneous Control](https://developer.arm.com/documentation/ddi0406/c/Application-Level-Architecture/Thumb-Instruction-Set-Encoding/32-bit-Thumb-instruction-encoding/Branches-and-miscellaneous-control?lang=en)
+
+Bootloader and `fpb_tools` is inspired from
++ [https://github.com/mitre-cyber-academy/2023-ectf-tools](https://github.com/mitre-cyber-academy/2023-ectf-tools)
