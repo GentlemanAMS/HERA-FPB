@@ -1,7 +1,7 @@
-# HERA-FPB
+# Hotpatching Embedded Real-time Applications
 Implementation of Hotpatching-Embedded Real Time Application using Flash Patch and Breakpoint in ARM Cortex M4 controllers. 
 
-# Environment Setup:
+## Environment Setup:
 
 **Required Software:**
 + Git
@@ -45,19 +45,53 @@ This step builds the binaries that can be loaded into the development boards. Th
 
 **device.load_hw**
 
-The load stage loads a packaged device binary+EEPROM into a target device. Plug a device with the bootloader installed into your computer, and hold down the right button while turning on the power. The device will slowly flash a cyan LED, indicating it is ready to install firmware. Then start the device load step.
+The load stage loads a packaged device binary+EEPROM into a target device. Plug a device with the bootloader installed into your computer, while hold down the `SW2` right button. The device will slowly flash a cyan LED, indicating it is ready to install firmware. Then start the device load step.
 ```
 python3 -m fpb_tools device.load_hw --folder <OUTPUT_VOLUME> --filename <BINARY_FILE_NAME> --serial-port <SERIAL_PORT>
 ```
 When the install finishes, the cyan LED will be solid. Now, power cycle the device, and the LED should be solid green, showing that the firmware is running.
 
 
+## Patch Generation & Update
 
-# Presentation Video
+Primary focus of the implementation is to showcase a proof-of-concept for utilizing hardware-debugging units like Flash Patch & Breakpoint unit in ARM Cortex M3/M4 microcontrollers for hotpatching process. The implementation is deviated at a number of places from the original [paper](https://www.ndss-symposium.org/wp-content/uploads/ndss2021_6B-2_24159_paper.pdf) like  the use of Flash memory to store the patch for persistent usage. `RTOS` has not been used in this example - hence strict real-time deadlines are not followed.
+
+The implementation just switches on blue light `turn_blue_on()` and waits for a non zero time thrice. This iteration is performed forever.
+```
+void setup(){
+    ....
+}
+void loop(){
+    ....
+    turn_blue_on()
+    delay()
+    turn_blue_on()
+    delay()
+    turn_blue_on()
+    delay()
+}
+int main(){
+    setup()
+    while(True)
+      loop()
+}
+```
+Based on user's request, the device generates a patch and hotpatches one of the three `turn_blue_on()` functions to change the blue light to red, green or switch off completely without restarting the device. The firmware doesn't initially have the functionality to switch on red or green light or switch off all three completely.     
+
+To hotpatch the device, run the following commands
+```
+python3 patch_update.py
+```
+Ensure that the device is connected to your system when the command is run. Currently any function can be hotpatched only once. To ensure this, the details of earlier hotpatching are stored in `patch_maintainer.json` file. If your firmware is updated thrice, then `patch_update` will prevent further updates. To go to the initial state, the firmware is to be uploaded again using `device.load_hw` and `patch_maintainer.json` file must be removed.
+
+## Analysis
+
+
+## Presentation Video
 
 https://drive.google.com/file/d/1JudSKkRnc5fNcGtYRVtBAcMILmWfy48V/view
 
-# References
+## References
 
 + [https://www.ndss-symposium.org/wp-content/uploads/ndss2021_6B-2_24159_paper.pdf](https://www.ndss-symposium.org/wp-content/uploads/ndss2021_6B-2_24159_paper.pdf)
 + [https://www.youtube.com/watch?v=WGE2JhjrcpE&list=PLfUWWM-POgQuaImJ-0o-wxdSmVuVtkE9j&index=4](https://www.youtube.com/watch?v=WGE2JhjrcpE&list=PLfUWWM-POgQuaImJ-0o-wxdSmVuVtkE9j&index=4)
