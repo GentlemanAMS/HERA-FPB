@@ -84,8 +84,7 @@ python3 patch_update.py
 ```
 Ensure that the device is connected to your system when the command is run. Currently any function can be hotpatched only once. To ensure this, the details of earlier hotpatching are stored in `patch_maintainer.json` file. If your firmware is updated thrice, then `patch_update` will prevent further updates. To go to the initial state, the firmware is to be uploaded again using `device.load_hw` and `patch_maintainer.json` file must be removed.
 
-## Analysis
-
+While running the patch update, ensure that there are no hardware breakpoints set by any debugger(Ex: OpenOCD GDB) - else the update will not be reflected, since the debugger also uses the same hardware as the hotpatching mechanism.
 
 ## Presentation Video
 
